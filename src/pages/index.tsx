@@ -1,3 +1,4 @@
+import { GetServerSideProps } from "next";
 import Image from "next/future/image";
 
 import { useKeenSlider } from "keen-slider/react";
@@ -9,6 +10,7 @@ import camiseta2 from "../assets/camisetas/2.png";
 import camiseta3 from "../assets/camisetas/3.png";
 
 import "keen-slider/keen-slider.min.css";
+import { stripe } from "../lib/stripe";
 
 export default function Home(props) {
   const [sliderRef] = useKeenSlider({
@@ -60,10 +62,17 @@ export default function Home(props) {
   );
 }
 
-export const getServerSideProps = async () => {
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+export const getServerSideProps: GetServerSideProps = async () => {
+  const response = await stripe.products.list()
 
-  console.log("rodou");
+  const products = response.data.map(product => {
+    return {
+      id: product.id,
+      name: product.name,
+      imageUrl: product.images[0],
+      url: product.url,
+    }
+  })
 
   return {
     props: {
